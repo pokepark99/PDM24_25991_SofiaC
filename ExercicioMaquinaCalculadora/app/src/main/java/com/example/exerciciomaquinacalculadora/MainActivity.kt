@@ -4,11 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -17,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.exerciciomaquinacalculadora.ui.theme.ExercicioMaquinaCalculadoraTheme
@@ -33,16 +36,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/*
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
- */
-
 @Composable
 fun Calc() {
     var apr = remember {//valor a ser apresentado na tela
@@ -57,23 +50,22 @@ fun Calc() {
 
     val listaButoes = listOf( //usar val pq isto nao pode ser mudado
         listOf("sqrt", "%", "+/-", "CE"),
-        listOf("7", "8", "9", "%"),
+        listOf("7", "8", "9", "/"),
         listOf("4", "5", "6", "x"),
         listOf("1", "2", "3", "-"),
         listOf("0", ".", "=", "+")
     )
-    val listaOperadors = listOf("/", "*", "-", "+")
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Color.Black)) {
         Row {
-            TextField(value = apr.value, label = { Text("") }, onValueChange = {})
+            TextField(value = apr.value, label = { Text("") }, onValueChange = {}, colors = OutlinedTextFieldDefaults.colors( unfocusedContainerColor = Color.Black, unfocusedTextColor = Color.White))
         }
-        Butoes(listaButoes, apr)
+        Butoes(listaButoes, apr, valorAnterior, operacao)
     }
 }
 
 @Composable
-fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>){
+fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>, valorAnterior: MutableState<String>, operacao: MutableState<String>){
     for (lista in listaButoes){
         Row(verticalAlignment = Alignment.CenterVertically){
             for(numero in lista){
@@ -84,7 +76,22 @@ fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>){
                         } else {
                             apr.value = "-${apr.value}"
                         }
-                    } else if(apr.value ==""){
+                    } else if (numero == "CE"){
+                        apr.value = ""
+                        valorAnterior.value = ""
+                        operacao.value = ""
+                    } else if(numero == "+" || numero == "-" || numero == "/" || numero == "x"){
+                        if(valorAnterior.value == ""){
+                            valorAnterior.value = apr.value
+                            apr.value = ""
+                        } else {
+                            valorAnterior.value = Resultado(valorAnterior.value, operacao.value, apr.value)
+                            apr.value = ""
+                        }
+                    } else if (numero == "="){
+                        apr.value = Resultado(valorAnterior.value, operacao.value, apr.value)
+                        valorAnterior.value = apr.value
+                    }else if(apr.value == ""){
                         if(numero =="."){
                             apr.value = "0${apr.value}"
                             apr.value += numero
@@ -107,8 +114,21 @@ fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>){
     }
 }
 
-fun Resultado(){ //funcao para calcular o resultado
+fun Resultado(valorAnterior: String, operacao: String, apr: String): String { //funcao para calcular o resultado
+    val num1 = valorAnterior.toDouble()
+    val num2 = apr.toDouble()
+    var resultado = ""
 
+    if (operacao == "+"){
+        resultado = (num1 + num2).toString()
+    } else if (operacao == "-"){
+        resultado = (num1 - num2).toString()
+    } else if (operacao == "/"){
+        resultado = (num1/num2).toString()
+    } else if (operacao == "x"){
+        resultado = (num1 * num2).toString()
+    }
+    return resultado
 }
 
 @Preview(showBackground = true)
