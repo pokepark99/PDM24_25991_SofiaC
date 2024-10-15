@@ -48,6 +48,10 @@ fun Calc() {
         mutableStateOf("")
     }
 
+    val percentagem = remember{//e percentagem ou nao
+        mutableStateOf(false)
+    }
+
     val listaButoes = listOf( //usar val pq isto nao pode ser mudado
         listOf("sqrt", "%", "+/-", "CE"),
         listOf("7", "8", "9", "/"),
@@ -58,14 +62,14 @@ fun Calc() {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Color.Black)) {
         Row {
-            TextField(value = apr.value, label = { Text("") }, onValueChange = {}, colors = OutlinedTextFieldDefaults.colors( unfocusedContainerColor = Color.Black, unfocusedTextColor = Color.White))
+            TextField(value = apr.value, readOnly = true, label = { Text("") }, onValueChange = {}, colors = OutlinedTextFieldDefaults.colors( unfocusedContainerColor = Color.Black, unfocusedTextColor = Color.White, focusedTextColor = Color.White))
         }
-        Butoes(listaButoes, apr, valorAnterior, operacao)
+        Butoes(listaButoes, apr, valorAnterior, operacao, percentagem)
     }
 }
 
 @Composable
-fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>, valorAnterior: MutableState<String>, operacao: MutableState<String>){
+fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>, valorAnterior: MutableState<String>, operacao: MutableState<String>, percentagem: MutableState<Boolean>){
     for (lista in listaButoes){
         Row(verticalAlignment = Alignment.CenterVertically){
             for(numero in lista){
@@ -80,17 +84,29 @@ fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>, valorAnte
                         apr.value = ""
                         valorAnterior.value = ""
                         operacao.value = ""
+                        percentagem.value = false
+                    } else if(numero == "%"){
+                        if(percentagem.value){ //se e uma percentagem
+                            apr.value = (apr.value.toDouble() * 100).toString()
+                        } else {
+                            apr.value = (apr.value.toDouble() / 100).toString()
+                        }
+                        percentagem.value = !percentagem.value //o estado muda
+                    }else if (numero == "sqrt"){
+                        apr.value = Math.sqrt(apr.value.toDouble()).toString()
                     } else if(numero == "+" || numero == "-" || numero == "/" || numero == "x"){
                         if(valorAnterior.value == ""){
                             valorAnterior.value = apr.value
-                            apr.value = ""
                         } else {
                             valorAnterior.value = Resultado(valorAnterior.value, operacao.value, apr.value)
-                            apr.value = ""
+                            apr.value = valorAnterior.value
                         }
+                        apr.value = ""
+                        operacao.value = numero
                     } else if (numero == "="){
                         apr.value = Resultado(valorAnterior.value, operacao.value, apr.value)
                         valorAnterior.value = apr.value
+                        operacao.value = ""
                     }else if(apr.value == ""){
                         if(numero =="."){
                             apr.value = "0${apr.value}"
@@ -115,6 +131,10 @@ fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>, valorAnte
 }
 
 fun Resultado(valorAnterior: String, operacao: String, apr: String): String { //funcao para calcular o resultado
+    if (valorAnterior.isEmpty() || operacao.isEmpty() || apr.isEmpty()) {
+        return apr
+    }
+
     val num1 = valorAnterior.toDouble()
     val num2 = apr.toDouble()
     var resultado = ""
