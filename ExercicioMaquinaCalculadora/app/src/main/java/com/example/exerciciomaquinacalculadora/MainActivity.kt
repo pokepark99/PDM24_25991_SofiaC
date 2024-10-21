@@ -123,7 +123,7 @@ fun Butoes(listaButoes: List<List<String>>, apr: MutableState<String>, valorAnte
                     }
                 }){
                     Text(numero)
-                    }
+                }
                 Spacer(modifier = Modifier.width(3.dp))
             }
         }
