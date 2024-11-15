@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.noticias"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.noticias"
@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.retrofit)
     implementation(libs.gson)
     implementation(libs.androidx.core.ktx)
