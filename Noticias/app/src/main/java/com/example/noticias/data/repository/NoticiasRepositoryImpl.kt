@@ -7,10 +7,10 @@ import com.example.noticias.domain.repository.NoticiaRepository
 
 class NoticiasRepositoryImpl(private val api: NoticiaApi) : NoticiaRepository {
     override suspend fun getNoticias(): List<Noticia> {
-        return api.getNoticia().map {it.toNoticia()}
+        return api.getNoticia().results.map { it.toNoticia() }
     }
-
     override suspend fun getNoticiaDetail(noticiaUrl: String): NoticiaDetail {
-        return api.getNoticiaDetail(noticiaUrl).toNoticiaDetail()
+        val response = api.getNoticiaDetail(noticiaUrl)
+        return response.toNoticiaDetail()
     }
 }

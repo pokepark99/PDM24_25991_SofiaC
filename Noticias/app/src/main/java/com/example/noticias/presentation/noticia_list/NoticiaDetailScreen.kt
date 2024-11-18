@@ -23,7 +23,6 @@ fun NoticiaDetailScreen(
 ) {
     val noticiaDetail = viewModel.noticiaDetail.collectAsState().value
 
-    // Fetch noticia detail when noticiaUrl changes
     LaunchedEffect(noticiaUrl) {
         viewModel.fetchNoticiaDetail(noticiaUrl)
     }
@@ -35,18 +34,21 @@ fun NoticiaDetailScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (noticiaDetail != null) {
-            Text(text = "News Title: ${noticiaDetail.title}")
-            Text(text = "News Section: ${noticiaDetail.section}")
-            Text(text = "News Subsection: ${noticiaDetail.subsection}")
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = { onBack() }) {
-                Text("Back to List")
+        when (noticiaDetail) {
+            null -> {
+                Text(text = "Loading...") // Show a loading state
             }
-        } else {
-            Text(text = "Loading...")
+            else -> {
+                // Display detailed article information
+                Text(text = "News Title: ${noticiaDetail.title}")
+                Text(text = "News Section: ${noticiaDetail.section}")
+                Text(text = "News Subsection: ${noticiaDetail.subsection}")
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(onClick = { onBack() }) {
+                    Text("Back to List")
+                }
+            }
         }
     }
 }

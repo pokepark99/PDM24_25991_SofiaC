@@ -19,8 +19,7 @@ class NoticiaListViewModel : ViewModel(){
     fun fetchNoticias(){
         viewModelScope.launch {
             try {
-                val result = getNoticiaUseCase()
-                println("Fetched noticias: $result")
+                noticias.value = getNoticiaUseCase()
             } catch (e: Exception) {
                 println("Failed to fetch noticias: ${e.message}")
                 noticias.value = emptyList()

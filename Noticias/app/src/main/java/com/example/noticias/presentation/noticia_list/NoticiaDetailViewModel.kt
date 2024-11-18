@@ -5,21 +5,19 @@ import androidx.lifecycle.viewModelScope
 import com.example.noticias.data.remote.RetrofitInstance
 import com.example.noticias.data.repository.NoticiasRepositoryImpl
 import com.example.noticias.domain.model.NoticiaDetail
-import com.example.noticias.domain.use_case.GetNoticiaDetailUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class NoticiaDetailViewModel : ViewModel(){
+class NoticiaDetailViewModel : ViewModel() {
     private val api = RetrofitInstance.api
     private val repository = NoticiasRepositoryImpl(api)
-    private val getNoticiaDetailUseCase = GetNoticiaDetailUseCase(repository)
 
     val noticiaDetail = MutableStateFlow<NoticiaDetail?>(null)
 
-    fun fetchNoticiaDetail(noticiaUrl: String){
+    fun fetchNoticiaDetail(noticiaUrl: String) {
         viewModelScope.launch {
             try {
-                noticiaDetail.value = getNoticiaDetailUseCase(noticiaUrl)
+                noticiaDetail.value = repository.getNoticiaDetail(noticiaUrl) // Call repository directly
             } catch (e: Exception) {
                 noticiaDetail.value = null
             }
