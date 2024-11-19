@@ -27,7 +27,7 @@ class NoticiaDetailViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val articles = repository.getNoticias()
-                //encontra o artigo com o mesmo url
+
                 val selectedNoticia = articles.find { it.url == noticiaUrl }
 
                 if (selectedNoticia != null) {

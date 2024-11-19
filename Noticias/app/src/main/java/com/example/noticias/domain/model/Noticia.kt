@@ -2,7 +2,7 @@ package com.example.noticias.domain.model
 
 data class Noticia(
     val title: String,
-    val publishedDate: String?,
+    val published_date: String,
     val url: String,
     val abstract: String,
     val section: String,

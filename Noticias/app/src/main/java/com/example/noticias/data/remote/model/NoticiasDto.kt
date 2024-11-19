@@ -4,7 +4,7 @@ import com.example.noticias.domain.model.Noticia
 
 data class NoticiasDto(
     val title: String,
-    val publishedDate: String?,
+    val published_date: String,
     val url: String,
     val abstract: String,
     val section: String,
@@ -19,7 +19,7 @@ data class NoticiasDto(
     fun toNoticia(): Noticia {
         return Noticia(
             title = title,
-            publishedDate = publishedDate,
+            published_date = published_date,
             url = url,
             abstract = abstract,
             section = section,
