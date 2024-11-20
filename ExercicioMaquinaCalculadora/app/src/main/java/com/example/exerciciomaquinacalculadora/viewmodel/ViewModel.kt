@@ -5,38 +5,29 @@ import androidx.lifecycle.ViewModel
 import com.example.exerciciomaquinacalculadora.models.CalculatorBrain
 
 class CalculatorViewModel : ViewModel() {
-    val apr = mutableStateOf("")
+    val apr = mutableStateOf("") //valor apresentado
     val valorAnterior = mutableStateOf("")
     val operacao = mutableStateOf("")
     val isPercentage = mutableStateOf(false)
 
-    private val brain = CalculatorBrain()
-
+    //trata de chamar funcoes para os butoes
     fun handleButtonPress(buttonLabel: String) {
         when (buttonLabel) {
-            "+/-" -> apr.value = brain.toggleSign(apr.value)
-            "CE" -> {
-                apr.value = ""
-                valorAnterior.value = ""
-                operacao.value = ""
-                isPercentage.value = false
-            }
-            "%" -> {
-                apr.value = brain.applyPercentage(apr.value, isPercentage.value)
-                isPercentage.value = !isPercentage.value
-            }
-            "sqrt" -> apr.value = brain.applySquareRoot(apr.value)
+            "+/-" -> apr.value = CalculatorBrain().toggleSign(apr.value)
+            "CE" -> resetCalculator()
+            "%" -> CalculatorBrain().applyPercentage(apr.value, isPercentage.value)
+            "sqrt" -> apr.value = CalculatorBrain().applySquareRoot(apr.value)
             "+", "-", "/", "x" -> {
                 if (valorAnterior.value.isEmpty()) {
                     valorAnterior.value = apr.value
                 } else {
-                    valorAnterior.value = brain.calculateResult(valorAnterior.value, operacao.value, apr.value)
+                    valorAnterior.value = CalculatorBrain().calculateResult(valorAnterior.value, operacao.value, apr.value)
                 }
                 apr.value = ""
                 operacao.value = buttonLabel
             }
             "=" -> {
-                apr.value = brain.calculateResult(valorAnterior.value, operacao.value, apr.value)
+                apr.value = CalculatorBrain().calculateResult(valorAnterior.value, operacao.value, apr.value)
                 valorAnterior.value = apr.value
                 operacao.value = ""
             }
@@ -51,4 +42,11 @@ class CalculatorViewModel : ViewModel() {
             }
         }
     }
+    fun resetCalculator() {
+        apr.value = ""
+        valorAnterior.value = ""
+        operacao.value = ""
+        isPercentage.value = false
+    }
 }
+

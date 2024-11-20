@@ -17,6 +17,7 @@ import com.example.exerciciomaquinacalculadora.viewmodel.CalculatorViewModel
 
 @Composable
 fun CalculatorUI(viewModel: CalculatorViewModel) {
+    //labels dos butoes
     val buttonLabels = listOf(
         listOf("sqrt", "%", "+/-", "CE"),
         listOf("7", "8", "9", "/"),
@@ -31,7 +32,6 @@ fun CalculatorUI(viewModel: CalculatorViewModel) {
             .background(Color.Black)
             .fillMaxSize()
     ) {
-        // Display Area
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -52,7 +52,7 @@ fun CalculatorUI(viewModel: CalculatorViewModel) {
             )
         }
 
-        // Buttons Area
+        //butoes
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
@@ -63,7 +63,7 @@ fun CalculatorUI(viewModel: CalculatorViewModel) {
             buttonLabels.forEach { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly, // Space buttons equally
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     row.forEach { label ->

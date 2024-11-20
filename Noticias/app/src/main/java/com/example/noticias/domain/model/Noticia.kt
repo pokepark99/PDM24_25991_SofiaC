@@ -12,5 +12,12 @@ data class Noticia(
     val orgFacet: List<String> = emptyList(),
     val perFacet: List<String> = emptyList(),
     val geoFacet: List<String> = emptyList(),
-    val multimedia: List<Multimedia>? = null
+    val multimedia: List<Multimedia>? = null,
+    val uri: String,
+    val item_type: String?,
+    val kicker: String?,
+    val material_type_facet: String?,
+    val short_url: String,
+    val updated_date: String,
+    val created_date: String
 )

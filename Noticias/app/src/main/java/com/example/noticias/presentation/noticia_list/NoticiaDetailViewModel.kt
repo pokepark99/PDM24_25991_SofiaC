@@ -23,11 +23,12 @@ class NoticiaDetailViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
+    // Buscar os detalhes de uma notícia específica atraves do URL
     fun fetchNoticiaDetail(noticiaUrl: String) {
         viewModelScope.launch {
             try {
+                //procura todas as noticias para qual tem o URL correspondente
                 val articles = repository.getNoticias()
-
                 val selectedNoticia = articles.find { it.url == noticiaUrl }
 
                 if (selectedNoticia != null) {

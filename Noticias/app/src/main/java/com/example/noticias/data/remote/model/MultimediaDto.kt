@@ -12,8 +12,9 @@ data class MultimediaDto(
     val caption: String?,
     val copyright: String?
 ) {
+    // Converte um MultimediaDto para o modelo de Multimedia
     fun toMultimedia() = Multimedia(
-        url = url ?: "",
+        url = url ?: "", //String vazia como default
         format = format ?: "Unknown",
         caption = caption ?: "No caption available"
     )

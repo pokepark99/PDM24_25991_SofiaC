@@ -6,6 +6,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface NoticiaApi {
+    // Endpoint para obter notícias da secção "home" e a key da API
     @GET("{section}.json")
     suspend fun getNoticia(
         @Path("section") section: String = "home",

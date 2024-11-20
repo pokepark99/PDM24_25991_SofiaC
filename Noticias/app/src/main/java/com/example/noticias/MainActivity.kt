@@ -35,6 +35,7 @@ fun MainScreen() {
 
     var selectedNoticia by remember { mutableStateOf<Noticia?>(null) }
 
+    //navegacao de ecras
     if (selectedNoticia == null) {
         NoticiaListScreen(noticiaListViewModel) { noticia ->
             selectedNoticia = noticia
