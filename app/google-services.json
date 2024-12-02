@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "304105641411",
+    "project_id": "fir-compras-78671",
+    "storage_bucket": "fir-compras-78671.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304105641411:android:322ad238fbcf417d191976",
+        "android_client_info": {
+          "package_name": "com.example.firebasecompras"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA062YxdTt0ZaE8XHhdOEg7nmAr0ZYpMFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
