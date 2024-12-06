@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.NavHostController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -21,20 +22,46 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Login()
+            AppNavigation()
         }
     }
 
-    fun registerUserFirebase(email: String, password: String) {
+    fun registerUserFirebase(email: String, password: String, name: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(
-                        this,
-                        "Registration Successful",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // Get the current user
+                    val user = auth.currentUser
+                    user?.let {
+                        val uid = it.uid // Get the user's UID
+
+                        // Save the name to Firestore
+                        val db = Firebase.firestore
+                        val userMap = hashMapOf(
+                            "name" to name,
+                            "sharedCarts" to emptyList<String>() // Initialize sharedCarts as an empty list
+                        )
+
+                        db.collection("users").document(uid)
+                            .set(userMap)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    this,
+                                    "Registration and Firestore Save Successful",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error saving to Firestore", e)
+                                Toast.makeText(
+                                    this,
+                                    "Registration Successful, but Firestore Save Failed: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
                 } else {
+                    // Handle registration failure
                     Toast.makeText(
                         this,
                         "Registration Failed: ${task.exception?.message}",
@@ -44,7 +71,7 @@ class MainActivity : ComponentActivity() {
             }
     }
 
-    fun signInUserFirebase(email: String, password: String) {
+    fun signInUserFirebase(email: String, password: String, navController: NavHostController) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -53,6 +80,7 @@ class MainActivity : ComponentActivity() {
                         "Login Successful",
                         Toast.LENGTH_SHORT
                     ).show()
+                    navController.navigate("mainScreen")
                 } else {
                     Toast.makeText(
                         this,
