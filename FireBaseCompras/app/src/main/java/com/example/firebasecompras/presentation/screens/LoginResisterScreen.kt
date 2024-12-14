@@ -1,4 +1,4 @@
-package com.example.firebasecompras
+package com.example.firebasecompras.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,46 +8,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
-
-    NavHost(navController = navController, startDestination = "inicio") {
-        composable("inicio") {
-            LoginRegisterScreen(navController)
-        }
-        composable("login") {
-            LoginScreen(navController)
-        }
-        composable("signup") {
-            RegisterScreen(navController)
-        }
-        composable("mainScreen") {
-            MainScreen(navController)
-        }
-    }
-}
+import com.example.firebasecompras.presentation.viewModels.LoginRegisterViewModel
 
 @Composable
 fun LoginRegisterScreen(navController: NavHostController) {
+    // Get the ViewModel instance
+    val loginRegisterViewModel: LoginRegisterViewModel = viewModel()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        //login
         Button(onClick = {
-            navController.navigate("login")
+            loginRegisterViewModel.navigateToLogin(navController)
         }) {
             Text("Login")
         }
-
+        //sign in
         Button(onClick = {
-            navController.navigate("signup")
+            loginRegisterViewModel.navigateToSignUp(navController)
         }) {
             Text("SignUp")
         }

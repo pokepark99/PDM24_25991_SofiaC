@@ -8,11 +8,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.NavHostController
-import com.example.firebasecompras.data.domain.model.Products
+import com.example.firebasecompras.navigation.AppNavigation
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
 class MainActivity : ComponentActivity() {
@@ -29,20 +28,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun registerUserFirebase(email: String, password: String, name: String, navController: NavHostController) {
+    //registar novo utilizador
+    fun registerUserFirebase(email: String, password: String, nome: String, navController: NavHostController) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Get the current user
                     val user = auth.currentUser
                     user?.let {
-                        val uid = it.uid // Get the user's UID
+                        val uid = it.uid
 
-                        // Save the name to Firestore
+                        // Guardar a informaçao do utilizador no Firestore
                         val db = Firebase.firestore
                         val userMap = hashMapOf(
-                            "name" to name,
-                            "sharedCarts" to emptyList<String>() // Initialize sharedCarts as an empty list
+                            "nome" to nome,
+                            "email" to email,
+                            "sharedCarts" to emptyList<String>()
                         )
 
                         db.collection("users").document(uid)
@@ -66,7 +66,6 @@ class MainActivity : ComponentActivity() {
                             }
                     }
                 } else {
-                    // Handle registration failure
                     Toast.makeText(
                         this,
                         "Registration Failed: ${task.exception?.message}",
@@ -75,7 +74,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
     }
-
+    //sign in de um utilizador
     fun signInUserFirebase(email: String, password: String, navController: NavHostController) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->

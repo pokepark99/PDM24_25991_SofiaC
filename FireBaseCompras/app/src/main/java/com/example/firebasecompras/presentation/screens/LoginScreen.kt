@@ -1,4 +1,4 @@
-package com.example.firebasecompras
+package com.example.firebasecompras.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,10 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.firebasecompras.MainActivity
+import com.example.firebasecompras.presentation.viewModels.LoginViewModel
 
 @Composable
 fun LoginScreen(navController: NavHostController){
+    val loginViewModel: LoginViewModel = viewModel()
     val mainActivity = LocalContext.current as MainActivity
 
     val email = remember { mutableStateOf("") }
@@ -28,7 +32,7 @@ fun LoginScreen(navController: NavHostController){
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        //TextFields for email, and password
+        //TextField email
         TextField(
             value = email.value,
             label = { Text("Email") },
@@ -36,15 +40,18 @@ fun LoginScreen(navController: NavHostController){
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+        //TextField password
         TextField(
             value = password.value,
             label = { Text("Password") },
             onValueChange = { password.value = it }
         )
+
         Spacer(modifier = Modifier.height(24.dp))
 
+        //Login
         Button(onClick = {
-            mainActivity.signInUserFirebase(email.value, password.value, navController)
+            loginViewModel.signInUserFirebase(email.value, password.value, navController, mainActivity)
         }) {
             Text("Login")
         }

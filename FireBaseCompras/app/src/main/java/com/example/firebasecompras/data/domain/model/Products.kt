@@ -5,11 +5,4 @@ data class Products(
     val nome: String? = null,
     val price: Double = 0.0,
     val stock: Int = 0
-) {
-    fun toProduct() = Products(
-        description = description ?: "",
-        nome = nome ?: "",
-        price = price ?: 0.0,
-        stock = stock ?: 0
-    )
-}
+)
