@@ -7,5 +7,5 @@ data class Carts(
     val createdAt: Date? = null,
     val ownerId: String? = null,
     val sharedWith: List<String>? = null,
-    val updatedAt: Date? = null
+    val isBought: Boolean? = false
 )

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,12 +26,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.firebasecompras.data.domain.model.CartItems
 import com.example.firebasecompras.data.domain.model.Carts
+import com.example.firebasecompras.presentation.viewModels.CartsViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import java.util.Date
 
@@ -51,6 +53,7 @@ fun CartsScreen(navController: NavHostController) {
 
             db.collection("Carts")
                 .whereEqualTo("ownerId", userId)
+                .whereEqualTo("isBought", false) //onde isBought e falso -- o carrinho ainda nao foi pagado
                 .addSnapshotListener { ownedCartsSnapshot, e ->
                     if (e != null) {
                         Log.e(TAG, "Listen for owned carts failed.", e)
@@ -61,13 +64,14 @@ fun CartsScreen(navController: NavHostController) {
 
                     db.collection("Carts")
                         .whereArrayContains("sharedWith", userId)
+                        .whereEqualTo("isBought", false)
                         .addSnapshotListener { sharedCartsSnapshot, sharedError ->
                             if (sharedError != null) {
                                 Log.e(TAG, "Listen for shared carts failed.", sharedError)
                                 return@addSnapshotListener //se houver mudancas nos carrinhos partilhardos com o utilizador
                             }
 
-                            val sharedCarts = sharedCartsSnapshot?.documents?.map { it.id to it.toObject(Carts::class.java)!! } ?: emptyList()
+                            val sharedCarts = sharedCartsSnapshot?.documents?.map { it.id to it.toObject(Carts::class.java)!!} ?: emptyList()
 
                             // carrinhos do utilizador e partilhados com ele
                             carts.value = ownedCarts + sharedCarts
@@ -85,7 +89,7 @@ fun CartsScreen(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            //LogOUt
+            //LogOut
             Button(onClick = { navController.navigate("inicio") }) {
                 Text("LogOut")
             }
@@ -102,7 +106,7 @@ fun CartsScreen(navController: NavHostController) {
         LazyColumn {
             items(carts.value) { (cartId, cart) ->
                 if (userId != null) {
-                    CartCard(cart = cart, cartId = cartId, currentUserId = userId)
+                    CartCard(cart = cart, cartId = cartId, currentUserId = userId, navController)
                 }
             }
         }
@@ -146,12 +150,12 @@ fun CartsScreen(navController: NavHostController) {
 // Novo Carrinho no firestore
 fun createNewCart(userId: String, cartName: String) {
     val db = Firebase.firestore
-    val newCart = Carts(
-        name = cartName.ifEmpty { "Unnamed Cart" }, // "Unnamed Cart" como default
-        createdAt = Date(),
-        updatedAt = Date(),
-        ownerId = userId,
-        sharedWith = emptyList()
+    val newCart = hashMapOf(
+        "name" to (cartName.ifEmpty { "Unnamed Cart" }),
+        "createdAt" to Date(),
+        "ownerId" to userId,
+        "sharedWith" to emptyList<String>(),
+        "isBought" to false
     )
 
     db.collection("Carts")
@@ -166,7 +170,9 @@ fun createNewCart(userId: String, cartName: String) {
 
 //seccao para cada carrinho
 @Composable
-fun CartCard(cart: Carts, cartId: String, currentUserId: String) {
+fun CartCard(cart: Carts, cartId: String, currentUserId: String, navController: NavHostController) {
+    val cartsViewModel: CartsViewModel = viewModel()
+
     val products = remember { mutableStateOf<List<CartItems>>(emptyList()) }
     val productDetails = remember { mutableStateOf<Map<String, Pair<String, Double>>>(emptyMap()) }
     val isSharedCart = cart.ownerId != currentUserId
@@ -277,6 +283,31 @@ fun CartCard(cart: Carts, cartId: String, currentUserId: String) {
                     )
                 }
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly // Space buttons evenly
+            ) {
+                // Delete Button
+                Button(
+                    onClick = {
+                        cartsViewModel.deleteCart(cartId)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red) // Red button
+                ) {
+                    Text("Delete", color = Color.White)
+                }
+
+                // Buy Button
+                Button(
+                    onClick = {
+                        navController.navigate("pay/${cartId}")
+                    }
+                ) {
+                    Text("Buy")
+                }
+            }
         }
     }
 
@@ -298,9 +329,9 @@ fun CartCard(cart: Carts, cartId: String, currentUserId: String) {
             confirmButton = {
                 Button(
                     onClick = {
-                        shareCart(cartId, shareWithEmail.value) // Call share function
-                        showShareDialog.value = false // Hide dialog
-                        shareWithEmail.value = "" // Clear input
+                        cartsViewModel.shareCart(cartId, shareWithEmail.value)
+                        showShareDialog.value = false
+                        shareWithEmail.value = ""
                     }
                 ) {
                     Text("Share")
@@ -331,7 +362,7 @@ fun CartCard(cart: Carts, cartId: String, currentUserId: String) {
             confirmButton = {
                 Button(
                     onClick = {
-                        renameCart(cartId, newCartName.value) // renomear carrinho
+                        cartsViewModel.renameCart(cartId, newCartName.value) // renomear carrinho
                         showRenameDialog.value = false
                     }
                 ) {
@@ -350,6 +381,7 @@ fun CartCard(cart: Carts, cartId: String, currentUserId: String) {
 // listar os detalhes dos produtos
 @Composable
 fun ProductRow(product: CartItems, productName: String, productPrice: Double, isOwnedByUser: Boolean) {
+    val cartsViewModel : CartsViewModel = viewModel()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -383,8 +415,8 @@ fun ProductRow(product: CartItems, productName: String, productPrice: Double, is
             // apenas tem a opcao de remover um produto de um carrinho se pertencer ao utilizador
             if (isOwnedByUser) {
                 Button(
-                    onClick = { removeProductFromCart(product) },
-                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                    onClick = { cartsViewModel.removeProductFromCart(product) },
+                    colors = ButtonDefaults.textButtonColors(
                         contentColor = Color.Red
                     ),
                     modifier = Modifier
@@ -393,82 +425,5 @@ fun ProductRow(product: CartItems, productName: String, productPrice: Double, is
                 }
             }
         }
-    }
-}
-
-//partilhar carrinho
-fun shareCart(cartId: String, userEmail: String) {
-    val db = Firebase.firestore
-
-    // encontrar utilizador atraves do email
-    db.collection("users")
-        .whereEqualTo("email", userEmail)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-            if (querySnapshot.documents.isNotEmpty()) {
-                // retornar o id do utilizador
-                val userIdToShareWith = querySnapshot.documents[0].id
-
-                // addicionar o id do utilizador a sharedWith
-                db.collection("Carts")
-                    .document(cartId)
-                    .update("sharedWith", FieldValue.arrayUnion(userIdToShareWith))
-                    .addOnSuccessListener {
-                        Log.d(TAG, "Cart successfully shared with $userEmail!")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e(TAG, "Error sharing cart", e)
-                    }
-            } else {
-                Log.e(TAG, "Email not found in Firestore users collection: $userEmail")
-            }
-        }
-        .addOnFailureListener { e ->
-            Log.e(TAG, "Error querying email in Firestore users collection: $userEmail", e)
-        }
-}
-
-//Renomear carrinho
-fun renameCart(cartId: String, newCartName: String) {
-    val db = Firebase.firestore
-
-    // Atualizar no firestore
-    db.collection("Carts")
-        .document(cartId)
-        .update("name", newCartName.ifEmpty { "Unnamed Cart" }) // "Unnamed Cart" como default
-        .addOnSuccessListener {
-            Log.d(TAG, "Cart renamed successfully!")
-        }
-        .addOnFailureListener { e ->
-            Log.e(TAG, "Error renaming cart", e)
-        }
-}
-
-// remover produto do carrinho
-fun removeProductFromCart(product: CartItems) {
-    val db = Firebase.firestore
-
-    product.productId?.let { productId ->
-        db.collection("CartItems")
-            .whereEqualTo("cartId", product.cartId)
-            .whereEqualTo("productId", productId)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (!querySnapshot.isEmpty) {
-                    // Delete the document(s) matching the product in the cart
-                    for (document in querySnapshot.documents) {
-                        db.collection("CartItems").document(document.id).delete()
-                            .addOnSuccessListener {
-                                Log.d(TAG, "Product removed from cart successfully.")
-                            }
-                            .addOnFailureListener { e ->
-                                Log.e(TAG, "Error removing product from cart", e)
-                            }
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error finding product in cart", e)
-            }
     }
 }
