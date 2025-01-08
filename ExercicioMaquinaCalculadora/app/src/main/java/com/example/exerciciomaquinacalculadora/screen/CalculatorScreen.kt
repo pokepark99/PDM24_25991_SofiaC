@@ -1,4 +1,4 @@
-package com.example.exerciciomaquinacalculadora.ui
+package com.example.exerciciomaquinacalculadora.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -6,18 +6,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.exerciciomaquinacalculadora.ui.CalculatorButton
 import com.example.exerciciomaquinacalculadora.viewmodel.CalculatorViewModel
 
 @Composable
-fun CalculatorUI(viewModel: CalculatorViewModel) {
-    //labels dos butoes
+fun CalculatorScreen() {
+    val viewModel: CalculatorViewModel = viewModel()
+    val apr by viewModel.apr
     val buttonLabels = listOf(
         listOf("sqrt", "%", "+/-", "CE"),
         listOf("7", "8", "9", "/"),
@@ -40,19 +43,18 @@ fun CalculatorUI(viewModel: CalculatorViewModel) {
         ) {
             TextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = viewModel.apr.value,
-                readOnly = true,
-                label = { Text("") },
+                value = apr,
                 onValueChange = {},
-                colors = OutlinedTextFieldDefaults.colors(
+                readOnly = true,
+                colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = Color.Black,
+                    focusedContainerColor = Color.Black,
                     unfocusedTextColor = Color.White,
                     focusedTextColor = Color.White
                 )
             )
         }
 
-        //butoes
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
